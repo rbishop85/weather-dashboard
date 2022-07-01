@@ -41,5 +41,6 @@ Use local storage to save searched Cities to array list that is displayed for qu
 // Handle button clicks (past searches) to fetch weather information
 
 // function to fetch Geolocation Data for city (Geocoding API)
+https://openweathermap.org/api/geocoding-api
 // FUnction to Fetch WEather Data (Oncecall)
 

@@ -19,15 +19,17 @@
             <aside class="bg-secondary col-3">
                 <!-- City Search will go here -->
                 <h2>Search for a City:</h2>
-                <form>
-                    <input type="text" placeholder="City">
-                    <select id="countries" name="countries">
-                        <!-- <option value="volvo">Volvo</option>
-                        <option value="saab">Saab</option>
-                        <option value="fiat" selected>Fiat</option>
-                        <option value="audi">Audi</option> -->
-                      </select>
-
+                <form id="inputForm">
+                    <!-- User Types in requested City name -->
+                    <input type="text" id="cityInput" placeholder="City">
+                    <!-- User Selects Country that City is located in -->
+                    <select id="countries" name="countries"></select>
+                    <!-- If Country is US, then user can select State that City is located in -->
+                    <select id="states" name="states">
+                        <option value="" disabled selected>Select your State</option>
+                        <option value="Washington">Washington</option>
+                        <option value="Washington">Oregon</option>
+                    </select>
                 </form>
             </aside>
             <section class="bg-info col-9 container">

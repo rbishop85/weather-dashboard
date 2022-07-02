@@ -1,6 +1,7 @@
 // Country List Dropdown
 var countryListEl = $("#countries");
 var countriesApi = "https://restcountries.com/v3.1/all";
+var statesListEl = $("#states");
 
 
 // Fetches an API list of all 250 countries.  Pulls all country names and country codes and creates an array of objects for each.  Sorts that Array alphabetically by country name.  Appends each country into the dropdown list, setting the United States as the default selection.
@@ -23,3 +24,13 @@ fetch(countriesApi)
         })
     });
 
+
+// Display states list when country list is set to United States
+countryListEl.change(function() {
+    console.log(countryListEl.val())
+    if (countryListEl.val() == "US") {
+        document.getElementById('states').style.display = '';
+    } else {
+        document.getElementById('states').style.display = 'none';
+}
+});

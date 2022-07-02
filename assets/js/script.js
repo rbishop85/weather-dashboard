@@ -24,13 +24,20 @@ fetch(countriesApi)
         })
     });
 
-
+// Pulls from state list in other js file and appends each state into the dropdown list
+states.forEach(function (state) {
+    statesListEl.append(`<option value="${state.abbreviation}">${state.name}</option>`);
+})
+    
 // Display states list when country list is set to United States
 countryListEl.change(function() {
-    console.log(countryListEl.val())
     if (countryListEl.val() == "US") {
         document.getElementById('states').style.display = '';
     } else {
         document.getElementById('states').style.display = 'none';
-}
-});
+}});
+
+
+
+
+

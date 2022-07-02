@@ -1,7 +1,14 @@
 // Country List Dropdown
 var countryListEl = $("#countries");
 var countriesApi = "https://restcountries.com/v3.1/all";
+var geoApi = "http://api.openweathermap.org/geo/1.0/direct";
 var statesListEl = $("#states");
+var searchButtonEl = $("#searchButton")
+var cityInputEl = $("#cityInput")
+
+// Variable for Location to be searched for
+var geoLocation = "";
+var apiKey = "3b1598e13550c0d6619df609201a1c27";
 
 
 // Fetches an API list of all 250 countries.  Pulls all country names and country codes and creates an array of objects for each.  Sorts that Array alphabetically by country name.  Appends each country into the dropdown list, setting the United States as the default selection.
@@ -37,7 +44,32 @@ countryListEl.change(function() {
         document.getElementById('states').style.display = 'none';
 }});
 
+searchButtonEl.on("click", function(event) {
+    event.preventDefault();
+    if(cityInputEl.val() === "") {
+        alert("Please enter a city name.")
+        return;
+    } else if(countryListEl.val() === "US" && statesListEl.val() === null) {
+        alert("Please select a state.")
+        return;
+    } else if(countryListEl.val() === "US") {
+        geoLocation = (cityInputEl.val() + "," + statesListEl.val() + "," + countryListEl.val());
+        console.log(geoLocation);
+    } else {
+        geoLocation = (cityInputEl.val() + "," + countryListEl.val());
+        console.log(geoLocation);
+    }
+    findCoords();
+});
 
 
+function findCoords() {
+    fetch(`${geoApi}?q=${geoLocation}&appid=${apiKey}`)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      console.log(data)
+})};
 
 

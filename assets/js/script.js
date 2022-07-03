@@ -1,15 +1,18 @@
 // Main page Elements
-var cityInputEl = $("#cityInput")
+var cityInputEl = $("#cityInput");
 var countryListEl = $("#countries");
 var statesListEl = $("#states");
-var searchButtonEl = $("#searchButton")
+var searchButtonEl = $("#searchButton");
+var weatherCurrentEl = $("#weatherCurrent");
+var weather5DayEl = $("#weather5Day");
+var weatherAlertEl = $("#weatherAlert");
 
 // API web addresses
 var apiCountries = "https://restcountries.com/v3.1/all";
 var apiGeo = "http://api.openweathermap.org/geo/1.0/direct";
 var apiOneCall = "https://api.openweathermap.org/data/2.5/onecall";
 
-
+var DateTime = luxon.DateTime;
 
 var lat = "";
 var lon = "";
@@ -105,8 +108,30 @@ function pullWeatherData() {
     })
     .then(function (data) {
         console.log(data);
+        console.log(cityLocation);
+        // Converts dt variable from data into a readable Date
+        var currentDateTime = DateTime.fromSeconds(data.current.dt).toLocaleString();
+        console.log(currentDateTime);
+        printWeatherCurrent();
     })
+}
+
+function printWeatherCurrent() {
+    weatherCurrentEl.append(`
+    <p>${cityLocation}, Date</p>
+    <p>Current Weather description and Icon</p>
+    <p>Current Temp</p>
+    <p>Today's high and Low Temps</p>
+    <p>Wind Speed and Direction</p>
+    <p>Humidity</p>
+    <p>UV Index</p>
+    `)
+}
+
+function printWeather5Day() {
 
 }
 
+function printWeatherAlert() {
 
+}

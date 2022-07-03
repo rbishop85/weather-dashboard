@@ -8,3 +8,15 @@ header {
 /* #inputForm {
     width: 100%
 } */
+
+#cityInput {
+    width: 200px;
+}
+
+#countries {
+    width: 200px;
+}
+
+#states {
+    width: 200px;
+}

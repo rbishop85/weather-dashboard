@@ -1,18 +1,28 @@
-// Country List Dropdown
+// Main page Elements
+var cityInputEl = $("#cityInput")
 var countryListEl = $("#countries");
-var countriesApi = "https://restcountries.com/v3.1/all";
-var geoApi = "http://api.openweathermap.org/geo/1.0/direct";
 var statesListEl = $("#states");
 var searchButtonEl = $("#searchButton")
-var cityInputEl = $("#cityInput")
+
+// API web addresses
+var apiCountries = "https://restcountries.com/v3.1/all";
+var apiGeo = "http://api.openweathermap.org/geo/1.0/direct";
+var apiOneCall = "https://api.openweathermap.org/data/2.5/onecall";
+
+
+
+var lat = "";
+var lon = "";
+
 
 // Variable for Location to be searched for
 var geoLocation = "";
 var apiKey = "3b1598e13550c0d6619df609201a1c27";
+var cityLocation = "";
 
 
 // Fetches an API list of all 250 countries.  Pulls all country names and country codes and creates an array of objects for each.  Sorts that Array alphabetically by country name.  Appends each country into the dropdown list, setting the United States as the default selection.
-fetch(countriesApi)
+fetch(apiCountries)
     .then(function (response) {
         return response.json();
     })
@@ -44,32 +54,59 @@ countryListEl.change(function() {
         document.getElementById('states').style.display = 'none';
 }});
 
+// What happens when the search button is clicked
 searchButtonEl.on("click", function(event) {
     event.preventDefault();
     if(cityInputEl.val() === "") {
-        alert("Please enter a city name.")
+        alert("Please enter a city name.");
         return;
     } else if(countryListEl.val() === "US" && statesListEl.val() === null) {
-        alert("Please select a state.")
+        alert("Please select a state.");
         return;
     } else if(countryListEl.val() === "US") {
         geoLocation = (cityInputEl.val() + "," + statesListEl.val() + "," + countryListEl.val());
         console.log(geoLocation);
+        cityLocation = (cityInputEl.val() + ", " + statesListEl.val());
+        console.log(cityLocation);
     } else {
         geoLocation = (cityInputEl.val() + "," + countryListEl.val());
         console.log(geoLocation);
+        cityLocation = (cityInputEl.val() + ", " + countryListEl.val());
+        console.log(cityLocation);
     }
     findCoords();
 });
 
 
 function findCoords() {
-    fetch(`${geoApi}?q=${geoLocation}&appid=${apiKey}`)
+    fetch(`${apiGeo}?q=${geoLocation}&appid=${apiKey}`)
     .then(function (response) {
       return response.json();
     })
     .then(function (data) {
-      console.log(data)
+        if(!data[0]) {
+            alert("City not found, please check info entered.")
+            return;
+        } else {
+            lat = (data[0].lat);
+            console.log("lat: " + lat);
+            lon = (data[0].lon);
+            console.log("lon: " + lon);
+            pullWeatherData();
+        }
+        
+        
 })};
+
+function pullWeatherData() {
+    fetch(`${apiOneCall}?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${apiKey}`)
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
+        console.log(data);
+    })
+
+}
 
 

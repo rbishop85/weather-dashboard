@@ -6,6 +6,7 @@ var searchButtonEl = $("#searchButton");
 var weatherCurrentEl = $("#weatherCurrent");
 var weather5DayEl = $("#weather5Day");
 var weatherAlertEl = $("#weatherAlert");
+var weatherHistoryEl = $("#weatherHistory");
 
 // API web addresses
 var apiCountries = "https://restcountries.com/v3.1/all";
@@ -22,6 +23,10 @@ var lon = "";
 var geoLocation = "";
 var apiKey = "3b1598e13550c0d6619df609201a1c27";
 var cityLocation = "";
+
+// Variables for calculating wind direction
+var directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+var windAngle = "";
 
 
 // Fetches an API list of all 250 countries.  Pulls all country names and country codes and creates an array of objects for each.  Sorts that Array alphabetically by country name.  Appends each country into the dropdown list, setting the United States as the default selection.
@@ -97,8 +102,10 @@ function findCoords() {
             console.log("lon: " + lon);
             pullWeatherData();
         }
-        
-        
+    weatherHistoryEl.append(`
+    <input class="btn btn-secondary" type="button" data-loc="${geoLocation}" value="${cityLocation}">
+    `)
+         
 })};
 
 function pullWeatherData() {
@@ -108,24 +115,25 @@ function pullWeatherData() {
     })
     .then(function (data) {
         console.log(data);
-        console.log(cityLocation);
         // Converts dt variable from data into a readable Date
-        var currentDateTime = DateTime.fromSeconds(data.current.dt).toLocaleString();
-        console.log(currentDateTime);
-        printWeatherCurrent();
-    })
-}
+        var currentDate = DateTime.fromSeconds(data.current.dt).toLocaleString();
+        var currentWeatherDesc = data.current.weather[0].description;
+        currentWeatherDesc = currentWeatherDesc.charAt(0).toUpperCase() + currentWeatherDesc.slice(1);
+        // var currentTemp = Math.round(data.current.temp);
+        windAngle = data.current.wind_deg;
 
-function printWeatherCurrent() {
-    weatherCurrentEl.append(`
-    <p>${cityLocation}, Date</p>
-    <p>Current Weather description and Icon</p>
-    <p>Current Temp</p>
-    <p>Today's high and Low Temps</p>
-    <p>Wind Speed and Direction</p>
-    <p>Humidity</p>
-    <p>UV Index</p>
-    `)
+        weatherCurrentEl.html("");
+        weatherCurrentEl.append(`
+        <p>${cityLocation} (${currentDate})</p>
+        <img src="http://openweathermap.org/img/wn/${data.current.weather[0].icon}@2x.png">
+        <p>${currentWeatherDesc}</p>
+        <p>Temp: ${Math.round(data.current.temp)}°F</p>
+        <p>Hi: ${Math.round(data.daily[0].temp.max)}°F, Lo: ${Math.round(data.daily[0].temp.min)}°F</p>
+        <p>Wind: ${windDirection(windAngle)} at ${Math.round(data.current.wind_speed)}mph</p>
+        <p>Humidity: ${data.current.humidity}%</p>
+        <p>UV Index</p>
+        `)
+    })
 }
 
 function printWeather5Day() {
@@ -134,4 +142,10 @@ function printWeather5Day() {
 
 function printWeatherAlert() {
 
+}
+
+// Determines wind direction from wind angle given
+function windDirection(windAngle) {
+   var index = Math.round(((windAngle %= 360) < 0 ? windAngle + 360 : windAngle) / 45) % 8;
+   return directions[index]
 }

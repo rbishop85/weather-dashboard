@@ -84,20 +84,12 @@ countryListEl.change(function() {
 weatherHistoryEl.on("click", function(event) {
     if (event.target.matches(".btn")) {
         geoLocation = event.target.dataset.loc;
-        console.log(geoLocation);
         cityLocation = event.target.value;
-        console.log(cityLocation);
-
         var indexOfObject = historyList.findIndex(object => {
             return object.geo === geoLocation;
           });
         historyList.splice(indexOfObject, 1);
-        
         addItemToHistory();
-
-   
-
-
         findCoords();
     }
 
@@ -113,31 +105,11 @@ searchButtonEl.on("click", function(event) {
         return;
     } else if(countryListEl.val() === "US") {
         geoLocation = (cityInputEl.val() + "," + statesListEl.val() + "," + countryListEl.val());
-        console.log(geoLocation);
         cityLocation = (cityInputEl.val() + ", " + statesListEl.val());
-        console.log(cityLocation);
-    } else {
+    } else {TamuningSan
         geoLocation = (cityInputEl.val() + "," + countryListEl.val());
-        console.log(geoLocation);
         cityLocation = (cityInputEl.val() + ", " + countryListEl.val());
-        console.log(cityLocation);
     }
-
-    // If the searched GeoLocation is not already located in the History, then add it to the history
-    // if (!historyList.some(e => e.geo === geoLocation)) {
-    //     var historyItem = {
-    //         geo: geoLocation,
-    //         city: cityLocation
-    //         };
-    //     historyList.unshift(historyItem);
-    //     // History list is limited to 6 items, removing the last item on the list
-    //     if (historyList.length > 6) {
-    //         historyList.length = 6;
-    //     }
-    //     localStorage.setItem("historyList", JSON.stringify(historyList));
-    //     populateSearchHistory();
-    //   }
-    addItemToHistory();
     findCoords();
 });
 
@@ -152,13 +124,10 @@ function findCoords() {
             return;
         } else {
             lat = (data[0].lat);
-            console.log("lat: " + lat);
             lon = (data[0].lon);
-            console.log("lon: " + lon);
+            addItemToHistory();
             pullWeatherData();
         }
-   
-         
 })};
 
 function pullWeatherData() {
@@ -174,18 +143,60 @@ function pullWeatherData() {
         currentWeatherDesc = currentWeatherDesc.charAt(0).toUpperCase() + currentWeatherDesc.slice(1);
         // var currentTemp = Math.round(data.current.temp);
         windAngle = data.current.wind_deg;
-
+        var uvColor = "";
+        if (data.current.uvi <= 2) {
+            uvColor = "green";
+        } else if(data.current.uvi <= 5) {
+            uvColor = "yellow";
+        } else if(data.current.uvi <= 7) {
+            uvColor = "orange";
+        } else if(data.current.uvi <= 10) {
+            uvColor = "red";
+        } else {
+            uvColor = "Purple";
+        }
         weatherCurrentEl.html("");
         weatherCurrentEl.append(`
-        <p>${cityLocation} (${currentDate})</p>
+        <h2 class="text-center">${cityLocation} (${currentDate})</h2>
         <img src="http://openweathermap.org/img/wn/${data.current.weather[0].icon}@2x.png">
         <p>${currentWeatherDesc}</p>
         <p>Temp: ${Math.round(data.current.temp)}°F</p>
-        <p>Hi: ${Math.round(data.daily[0].temp.max)}°F, Lo: ${Math.round(data.daily[0].temp.min)}°F</p>
+        <p><span class="text-warning">Hi: ${Math.round(data.daily[0].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(data.daily[0].temp.min)}°F</span></p>
         <p>Wind: ${windDirection(windAngle)} at ${Math.round(data.current.wind_speed)}mph</p>
         <p>Humidity: ${data.current.humidity}%</p>
-        <p>UV Index</p>
+        <p style="background-color:${uvColor}">UV Index: ${data.current.uvi} </p>
         `)
+
+        weather5DayEl.html("");
+        weather5DayEl.append(`
+        <h3 class="text-center">5-Day Forcast:</h3>
+        <div class="d-flex justify-content-evenly" id="test">
+        `);
+        var testEl = $("#test")
+        for (var i = 1; i < 6; i++){
+            testEl.append(`
+            <div class="bg-secondary p-2 mx-1">
+            <p class="text-center fw-bold">${DateTime.fromSeconds(data.daily[i].dt).toLocaleString()}</p>
+            <img src="http://openweathermap.org/img/wn/${data.daily[i].weather[0].icon}.png">
+            <p>${(data.daily[i].weather[0].description).charAt(0).toUpperCase() + (data.daily[i].weather[0].description).slice(1)}</p>
+            <p><span class="text-warning">Hi: ${Math.round(data.daily[i].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(data.daily[i].temp.min)}°F</span></p>
+            <p>Wind: ${windDirection(data.daily[i].wind_deg)} at ${Math.round(data.daily[i].wind_speed)}mph</p>
+            <p>Humidity: ${data.daily[i].humidity}%</p>
+            </div>
+            `)
+        }
+
+
+
+
+                    // 
+                    //     <div class="bg-primary p-2">
+                    //         <p>Date</p>
+                    //         <p>Weather Description & Icon</p>
+                    //         <p>Temp Low/Hi</p>
+                    //         <p>Wind Speed and Direction</p>
+                    //         <p>Humidity</p>
+                    //     </div>
     })
 }
 

@@ -11,12 +11,11 @@
 </head>
 <body class="">
     <header class="text-center py-3">
-        <h1 class="py-1">Weather Dashboard</h1>
-        <span>Date and Time</h2>
+        <h1 class="fw-bold py-1">Weather Dashboard</h1>
     </header>
     <main class="container-fluid">
         <div class="row">
-            <aside class=" col-3">
+            <aside class="col-3">
                 <!-- City Search will go here -->
                 <h2>Search for a City:</h2>
                 <form id="inputForm" class="d-grid gap-1 my-1">
@@ -30,63 +29,20 @@
                     </select>
                     <button type="submit" id="searchButton">Search</button>
                 </form>
-                <div id="weatherHistory" class="d-grid gap-2">
+                <div id="weatherHistory" class="d-grid gap-2 border border-2 border-dark rounded p-2">
 
                 </div>
             </aside>
-            <section class="bg-info col-9 container">
+            <section class="col-9 container">
                 <!-- Weather Information will go here -->
                 <div id="weatherCurrent">
-                    <!-- <p>Current City, State or Country, Date</p>
-                    <p>Current Weather description and Icon</p>
-                    <p>Current Temp</p>
-                    <p>Today's high and Low Temps</p>
-                    <p>Wind Speed and Direction</p>
-                    <p>Humidity</p>
-                    <p>UV Index</p> -->
+
                 </div>
                 <div id ="weather5Day">
-                    5-Day Forcast:
-                    <div class="d-flex justify-content-evenly">
-                        <div class="bg-primary p-2">
-                            <p>Date</p>
-                            <p>Weather Description & Icon</p>
-                            <p>Temp Low/Hi</p>
-                            <p>Wind Speed and Direction</p>
-                            <p>Humidity</p>
-                        </div>
-                        <div class="bg-secondary p-2">
-                            <p>Date</p>
-                            <p>Weather Description & Icon</p>
-                            <p>Temp Low/Hi</p>
-                            <p>Wind Speed and Direction</p>
-                            <p>Humidity</p>
-                        </div>
-                        <div class="bg-success p-2">
-                            <p>Date</p>
-                            <p>Weather Description & Icon</p>
-                            <p>Temp Low/Hi</p>
-                            <p>Wind Speed and Direction</p>
-                            <p>Humidity</p>
-                        </div>
-                        <div class="bg-danger p-2">
-                            <p>Date</p>
-                            <p>Weather Description & Icon</p>
-                            <p>Temp Low/Hi</p>
-                            <p>Wind Speed and Direction</p>
-                            <p>Humidity</p>
-                        </div>
-                        <div class="bg-warning p-2">
-                            <p>Date</p>
-                            <p>Weather Description & Icon</p>
-                            <p>Temp Low/Hi</p>
-                            <p>Wind Speed and Direction</p>
-                            <p>Humidity</p>
-                        </div>
-                    </div>
+
                 </div>
                 <div id="weatherAlert">
-
+                    <!-- Not currently in use... delete? -->
                 </div>
             </section>
         </div>

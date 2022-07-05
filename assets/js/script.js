@@ -87,6 +87,17 @@ weatherHistoryEl.on("click", function(event) {
         console.log(geoLocation);
         cityLocation = event.target.value;
         console.log(cityLocation);
+
+        var indexOfObject = historyList.findIndex(object => {
+            return object.geo === geoLocation;
+          });
+        historyList.splice(indexOfObject, 1);
+        
+        addItemToHistory();
+
+   
+
+
         findCoords();
     }
 
@@ -113,16 +124,20 @@ searchButtonEl.on("click", function(event) {
     }
 
     // If the searched GeoLocation is not already located in the History, then add it to the history
-    if (!historyList.some(e => e.geo === geoLocation)) {
-        var historyItem = {
-            geo: geoLocation,
-            city: cityLocation
-            };
-        historyList.unshift(historyItem);
-        localStorage.setItem("historyList", JSON.stringify(historyList));
-        populateSearchHistory();
-      }
-    
+    // if (!historyList.some(e => e.geo === geoLocation)) {
+    //     var historyItem = {
+    //         geo: geoLocation,
+    //         city: cityLocation
+    //         };
+    //     historyList.unshift(historyItem);
+    //     // History list is limited to 6 items, removing the last item on the list
+    //     if (historyList.length > 6) {
+    //         historyList.length = 6;
+    //     }
+    //     localStorage.setItem("historyList", JSON.stringify(historyList));
+    //     populateSearchHistory();
+    //   }
+    addItemToHistory();
     findCoords();
 });
 
@@ -186,5 +201,21 @@ function printWeatherAlert() {
 function windDirection(windAngle) {
    var index = Math.round(((windAngle %= 360) < 0 ? windAngle + 360 : windAngle) / 45) % 8;
    return directions[index]
+}
+
+function addItemToHistory () {
+    if (!historyList.some(e => e.geo === geoLocation)) {
+        var historyItem = {
+            geo: geoLocation,
+            city: cityLocation
+            };
+        historyList.unshift(historyItem);
+        // History list is limited to 6 items, removing the last item on the list
+        if (historyList.length > 6) {
+            historyList.length = 6;
+        }
+        localStorage.setItem("historyList", JSON.stringify(historyList));
+        populateSearchHistory();
+      }
 }
 

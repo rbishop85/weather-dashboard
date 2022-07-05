@@ -29,6 +29,23 @@ var directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
 var windAngle = "";
 
 
+// Function to load search History
+var historyList = [];
+
+populateSearchHistory();
+function populateSearchHistory() {
+    var storedHistory = JSON.parse(localStorage.getItem("historyList"));
+    if (storedHistory !== null) {
+        historyList = storedHistory;
+        weatherHistoryEl.html("");
+        historyList.forEach(function (historyItem) {
+            weatherHistoryEl.append(`
+            <input class="btn btn-secondary" type="button" data-loc="${historyItem.geo}" value="${historyItem.city}">
+            `);
+        })
+    }
+};
+
 // Fetches an API list of all 250 countries.  Pulls all country names and country codes and creates an array of objects for each.  Sorts that Array alphabetically by country name.  Appends each country into the dropdown list, setting the United States as the default selection.
 fetch(apiCountries)
     .then(function (response) {
@@ -62,6 +79,18 @@ countryListEl.change(function() {
         document.getElementById('states').style.display = 'none';
 }});
 
+
+// Click event for Weather History Buttons
+weatherHistoryEl.on("click", function(event) {
+    if (event.target.matches(".btn")) {
+        geoLocation = event.target.dataset.loc;
+        console.log(geoLocation);
+        cityLocation = event.target.value;
+        console.log(cityLocation);
+        findCoords();
+    }
+
+});
 // What happens when the search button is clicked
 searchButtonEl.on("click", function(event) {
     event.preventDefault();
@@ -82,9 +111,15 @@ searchButtonEl.on("click", function(event) {
         cityLocation = (cityInputEl.val() + ", " + countryListEl.val());
         console.log(cityLocation);
     }
+    var historyItem = {
+        geo: geoLocation,
+        city: cityLocation
+        };
+    historyList.unshift(historyItem);
+    localStorage.setItem("historyList", JSON.stringify(historyList));
+    populateSearchHistory();
     findCoords();
 });
-
 
 function findCoords() {
     fetch(`${apiGeo}?q=${geoLocation}&appid=${apiKey}`)
@@ -102,9 +137,7 @@ function findCoords() {
             console.log("lon: " + lon);
             pullWeatherData();
         }
-    weatherHistoryEl.append(`
-    <input class="btn btn-secondary" type="button" data-loc="${geoLocation}" value="${cityLocation}">
-    `)
+   
          
 })};
 
@@ -149,3 +182,4 @@ function windDirection(windAngle) {
    var index = Math.round(((windAngle %= 360) < 0 ? windAngle + 360 : windAngle) / 45) % 8;
    return directions[index]
 }
+

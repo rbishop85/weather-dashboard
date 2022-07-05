@@ -111,13 +111,18 @@ searchButtonEl.on("click", function(event) {
         cityLocation = (cityInputEl.val() + ", " + countryListEl.val());
         console.log(cityLocation);
     }
-    var historyItem = {
-        geo: geoLocation,
-        city: cityLocation
-        };
-    historyList.unshift(historyItem);
-    localStorage.setItem("historyList", JSON.stringify(historyList));
-    populateSearchHistory();
+
+    // If the searched GeoLocation is not already located in the History, then add it to the history
+    if (!historyList.some(e => e.geo === geoLocation)) {
+        var historyItem = {
+            geo: geoLocation,
+            city: cityLocation
+            };
+        historyList.unshift(historyItem);
+        localStorage.setItem("historyList", JSON.stringify(historyList));
+        populateSearchHistory();
+      }
+    
     findCoords();
 });
 

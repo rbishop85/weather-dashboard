@@ -98,10 +98,10 @@ weatherHistoryEl.on("click", function(event) {
 searchButtonEl.on("click", function(event) {
     event.preventDefault();
     if(cityInputEl.val() === "") {
-        alert("Please enter a city name.");
+        displayModal("Please enter a city name.");
         return;
     } else if(countryListEl.val() === "US" && statesListEl.val() === null) {
-        alert("Please select a state.");
+        displayModal("Please select a state.");
         return;
     } else if(countryListEl.val() === "US") {
         geoLocation = (cityInputEl.val() + "," + statesListEl.val() + "," + countryListEl.val());
@@ -120,7 +120,7 @@ function findCoords() {
     })
     .then(function (data) {
         if(!data[0]) {
-            alert("City not found, please check info entered.")
+            displayModal("City not found, please check info entered.");
             return;
         } else {
             lat = (data[0].lat);
@@ -156,23 +156,32 @@ function pullWeatherData() {
             uvColor = "Purple";
         }
         weatherCurrentEl.html("");
+        weatherCurrentEl.addClass("border border-2 border-dark rounded");
         weatherCurrentEl.append(`
-        <h2 class="text-center">${cityLocation} (${currentDate})</h2>
-        <img src="http://openweathermap.org/img/wn/${data.current.weather[0].icon}@2x.png">
-        <p>${currentWeatherDesc}</p>
+        <h2 class="text-center mb-5">${cityLocation} (${currentDate})</h2>
+        <div class="row justify-content-center">
+        <div class="col-auto"
         <p>Temp: ${Math.round(data.current.temp)}°F</p>
         <p><span class="text-warning">Hi: ${Math.round(data.daily[0].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(data.daily[0].temp.min)}°F</span></p>
         <p>Wind: ${windDirection(windAngle)} at ${Math.round(data.current.wind_speed)}mph</p>
         <p>Humidity: ${data.current.humidity}%</p>
-        <p style="background-color:${uvColor}">UV Index: ${data.current.uvi} </p>
+        <span class="p-1 rounded"style="background-color:${uvColor}; margin: auto">UV Index: ${data.current.uvi} </span>
+        </div>
+        <div class="col-2">
+        </div>
+        <div class="col-auto">
+        <img src="http://openweathermap.org/img/wn/${data.current.weather[0].icon}@2x.png">
+        <p>${currentWeatherDesc}</p>
+        </div>
+        </div>
         `)
 
         weather5DayEl.html("");
         weather5DayEl.append(`
         <h3 class="text-center">5-Day Forcast:</h3>
-        <div class="d-flex justify-content-evenly" id="test">
+        <div class="d-flex justify-content-evenly" id="fiveDayForcast">
         `);
-        var testEl = $("#test")
+        var testEl = $("#fiveDayForcast")
         for (var i = 1; i < 6; i++){
             testEl.append(`
             <div class="bg-secondary p-2 mx-1">
@@ -185,18 +194,6 @@ function pullWeatherData() {
             </div>
             `)
         }
-
-
-
-
-                    // 
-                    //     <div class="bg-primary p-2">
-                    //         <p>Date</p>
-                    //         <p>Weather Description & Icon</p>
-                    //         <p>Temp Low/Hi</p>
-                    //         <p>Wind Speed and Direction</p>
-                    //         <p>Humidity</p>
-                    //     </div>
     })
 }
 
@@ -230,3 +227,11 @@ function addItemToHistory () {
       }
 }
 
+
+function displayModal(text) {
+    $("#error").html(text);
+    $('#myModal').modal("show");
+};
+      
+
+   

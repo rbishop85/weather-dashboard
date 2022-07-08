@@ -1,3 +1,4 @@
+/* Background image info for header */
 header {
     background-image: url("../images/stormy-sky.jpg");
     background-position: center 80%;
@@ -5,18 +6,7 @@ header {
     background-repeat: no-repeat;
 }
 
-#cityInput {
-    width: 200px;
-}
-
-#countries {
-    width: 200px;
-}
-
-#states {
-    width: 200px;
-}
-
-#searchButton {
+/* Setting fixed width for search form elements */
+#cityInput, #countries, #states, #searchButton {
     width: 200px;
 }

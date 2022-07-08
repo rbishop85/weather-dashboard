@@ -44,3 +44,4 @@ Use local storage to save searched Cities to array list that is displayed for qu
 https://openweathermap.org/api/geocoding-api
 // FUnction to Fetch WEather Data (Oncecall)
 
+// Work on "passing through" data so functions more easily accept different data

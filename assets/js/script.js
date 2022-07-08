@@ -5,7 +5,6 @@ var statesListEl = $("#states");
 var searchButtonEl = $("#searchButton");
 var weatherCurrentEl = $("#weatherCurrent");
 var weather5DayEl = $("#weather5Day");
-var weatherAlertEl = $("#weatherAlert");
 var weatherHistoryEl = $("#weatherHistory");
 
 // API web addresses
@@ -15,19 +14,10 @@ var apiOneCall = "https://api.openweathermap.org/data/2.5/onecall";
 
 var DateTime = luxon.DateTime;
 
-var lat = "";
-var lon = "";
-
-
 // Variable for Location to be searched for
 var geoLocation = "";
 var apiKey = "3b1598e13550c0d6619df609201a1c27";
 var cityLocation = "";
-
-// Variables for calculating wind direction
-var directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-var windAngle = "";
-
 
 // Function to load search History
 var historyList = [];
@@ -88,6 +78,7 @@ weatherHistoryEl.on("click", function(event) {
         var indexOfObject = historyList.findIndex(object => {
             return object.geo === geoLocation;
           });
+        // Button clicked is removed from history list and then re-added to move it to top of the list
         historyList.splice(indexOfObject, 1);
         addItemToHistory();
         findCoords();
@@ -123,47 +114,38 @@ function findCoords() {
             displayModal("City not found, please check info entered.");
             return;
         } else {
-            lat = (data[0].lat);
-            lon = (data[0].lon);
             addItemToHistory();
-            pullWeatherData();
+            pullWeatherData(data[0].lat, data[0].lon);
         }
 })};
 
-function pullWeatherData() {
+function pullWeatherData(lat, lon) {
     fetch(`${apiOneCall}?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${apiKey}`)
     .then(function (response) {
         return response.json();
     })
     .then(function (data) {
         console.log(data);
-        // Converts dt variable from data into a readable Date
-        var currentDate = DateTime.fromSeconds(data.current.dt).toLocaleString();
-        var currentWeatherDesc = data.current.weather[0].description;
-        currentWeatherDesc = currentWeatherDesc.charAt(0).toUpperCase() + currentWeatherDesc.slice(1);
-        // var currentTemp = Math.round(data.current.temp);
-        windAngle = data.current.wind_deg;
-        var uvColor = "";
-        if (data.current.uvi <= 2) {
-            uvColor = "green";
-        } else if(data.current.uvi <= 5) {
-            uvColor = "yellow";
-        } else if(data.current.uvi <= 7) {
-            uvColor = "orange";
-        } else if(data.current.uvi <= 10) {
-            uvColor = "red";
-        } else {
-            uvColor = "Purple";
-        }
-        weatherCurrentEl.html("");
-        weatherCurrentEl.addClass("border border-2 border-dark rounded");
-        weatherCurrentEl.append(`
+        printWeather(data);
+    })
+}
+
+function printWeather(data) {
+    // Converts dt variable from data into a readable Date
+    var currentDate = DateTime.fromSeconds(data.current.dt).toLocaleString();
+    var currentWeatherDesc = data.current.weather[0].description;
+    currentWeatherDesc = currentWeatherDesc.charAt(0).toUpperCase() + currentWeatherDesc.slice(1);        
+    var uvColor = uvBackColor(data.current.uvi);
+
+    weatherCurrentEl.html("");
+    weatherCurrentEl.addClass("border border-2 border-dark rounded");
+    weatherCurrentEl.append(`
         <h2 class="text-center mb-5">${cityLocation} (${currentDate})</h2>
         <div class="row justify-content-center">
         <div class="col-auto"
         <p>Temp: ${Math.round(data.current.temp)}°F</p>
         <p><span class="text-warning">Hi: ${Math.round(data.daily[0].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(data.daily[0].temp.min)}°F</span></p>
-        <p>Wind: ${windDirection(windAngle)} at ${Math.round(data.current.wind_speed)}mph</p>
+        <p>Wind: ${windDirection(data.current.wind_deg)} at ${Math.round(data.current.wind_speed)}mph</p>
         <p>Humidity: ${data.current.humidity}%</p>
         <span class="p-1 rounded"style="background-color:${uvColor}; margin: auto">UV Index: ${data.current.uvi} </span>
         </div>
@@ -174,41 +156,35 @@ function pullWeatherData() {
         <p>${currentWeatherDesc}</p>
         </div>
         </div>
-        `)
-
-        weather5DayEl.html("");
-        weather5DayEl.append(`
-        <h3 class="text-center">5-Day Forcast:</h3>
-        <div class="d-flex justify-content-evenly" id="fiveDayForcast">
         `);
-        var testEl = $("#fiveDayForcast")
-        for (var i = 1; i < 6; i++){
-            testEl.append(`
-            <div class="bg-secondary p-2 mx-1">
-            <p class="text-center fw-bold">${DateTime.fromSeconds(data.daily[i].dt).toLocaleString()}</p>
-            <img src="http://openweathermap.org/img/wn/${data.daily[i].weather[0].icon}.png">
-            <p>${(data.daily[i].weather[0].description).charAt(0).toUpperCase() + (data.daily[i].weather[0].description).slice(1)}</p>
-            <p><span class="text-warning">Hi: ${Math.round(data.daily[i].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(data.daily[i].temp.min)}°F</span></p>
-            <p>Wind: ${windDirection(data.daily[i].wind_deg)} at ${Math.round(data.daily[i].wind_speed)}mph</p>
-            <p>Humidity: ${data.daily[i].humidity}%</p>
-            </div>
-            `)
+
+    weather5DayEl.html("");
+    weather5DayEl.append(`
+    <h3 class="text-center">5-Day Forcast:</h3>
+    <div class="d-flex justify-content-evenly" id="fiveDayForcast">
+    `);
+    var testEl = $("#fiveDayForcast")
+    for (var i = 1; i < 6; i++){
+    testEl.append(`
+        <div class="bg-secondary p-2 mx-1">
+        <p class="text-center fw-bold">${DateTime.fromSeconds(data.daily[i].dt).toLocaleString()}</p>
+        <img src="http://openweathermap.org/img/wn/${data.daily[i].weather[0].icon}.png">
+        <p>${(data.daily[i].weather[0].description).charAt(0).toUpperCase() + (data.daily[i].weather[0].description).slice(1)}</p>
+        <p><span class="text-warning">Hi: ${Math.round(data.daily[i].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(data.daily[i].temp.min)}°F</span></p>
+        <p>Wind: ${windDirection(data.daily[i].wind_deg)} at ${Math.round(data.daily[i].wind_speed)}mph</p>
+        <p>Humidity: ${data.daily[i].humidity}%</p>
+        </div>
+        `)
         }
-    })
-}
-
-function printWeather5Day() {
 
 }
 
-function printWeatherAlert() {
-
-}
 
 // Determines wind direction from wind angle given
-function windDirection(windAngle) {
-   var index = Math.round(((windAngle %= 360) < 0 ? windAngle + 360 : windAngle) / 45) % 8;
-   return directions[index]
+function windDirection(angle) {
+    var directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+    var index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
+    return directions[index]
 }
 
 function addItemToHistory () {
@@ -227,6 +203,20 @@ function addItemToHistory () {
       }
 }
 
+function uvBackColor(uvi) {
+    if (uvi <= 2) {
+        uvColor = "green";
+    } else if(uvi <= 5) {
+        uvColor = "yellow";
+    } else if(uvi <= 7) {
+        uvColor = "orange";
+    } else if(uvi <= 10) {
+        uvColor = "red";
+    } else {
+        uvColor = "Purple";
+    }
+    return uvColor;
+}
 
 function displayModal(text) {
     $("#error").html(text);

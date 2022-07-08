@@ -11,18 +11,20 @@ var weatherHistoryEl = $("#weatherHistory");
 var apiCountries = "https://restcountries.com/v3.1/all";
 var apiGeo = "http://api.openweathermap.org/geo/1.0/direct";
 var apiOneCall = "https://api.openweathermap.org/data/2.5/onecall";
+var apiKey = "3b1598e13550c0d6619df609201a1c27";
 
+// Shortens future luxon calls
 var DateTime = luxon.DateTime;
 
 // Variable for Location to be searched for
 var geoLocation = "";
-var apiKey = "3b1598e13550c0d6619df609201a1c27";
 var cityLocation = "";
 
 // Function to load search History
 var historyList = [];
 
-populateSearchHistory();
+pageStart();
+
 function populateSearchHistory() {
     var storedHistory = JSON.parse(localStorage.getItem("historyList"));
     if (storedHistory !== null) {
@@ -30,36 +32,43 @@ function populateSearchHistory() {
         weatherHistoryEl.html("");
         historyList.forEach(function (historyItem) {
             weatherHistoryEl.append(`
-            <input class="btn btn-secondary" type="button" data-loc="${historyItem.geo}" value="${historyItem.city}">
+            <div class="col-5 col-md-4 col-lg-10 my-1 px-2">
+            <input class="btn btn-secondary col-12" type="button" data-loc="${historyItem.geo}" value="${historyItem.city}">
+            </div>
             `);
         })
     }
 };
 
 // Fetches an API list of all 250 countries.  Pulls all country names and country codes and creates an array of objects for each.  Sorts that Array alphabetically by country name.  Appends each country into the dropdown list, setting the United States as the default selection.
-fetch(apiCountries)
-    .then(function (response) {
-        return response.json();
+function pageStart() {
+    fetch(apiCountries)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            var countryList = [];
+            data.forEach(function (country) {
+                var countryObject = {name: country.name.common, value: country.cca2}
+                countryList.push(countryObject);
+            })
+            countryList.sort((a, b) => (a.name > b.name) ? 1 : -1)
+            countryList.forEach(function (country) {
+                if(country.value === "US") {
+                    countryListEl.append(`<option value="${country.value}" selected>${country.name}</option>`);
+                } else
+                countryListEl.append(`<option value="${country.value}">${country.name}</option>`);
+            })
+        });
+    states.forEach(function (state) {
+        statesListEl.append(`<option value="${state.abbreviation}">${state.name}</option>`);
     })
-    .then(function (data) {
-        var countryList = [];
-        data.forEach(function (country) {
-            var countryObject = {name: country.name.common, value: country.cca2}
-            countryList.push(countryObject);
-        })
-        countryList.sort((a, b) => (a.name > b.name) ? 1 : -1)
-        countryList.forEach(function (country) {
-            if(country.value === "US") {
-                countryListEl.append(`<option value="${country.value}" selected>${country.name}</option>`);
-            } else
-            countryListEl.append(`<option value="${country.value}">${country.name}</option>`);
-        })
-    });
+    populateSearchHistory();
+}
+
 
 // Pulls from state list in other js file and appends each state into the dropdown list
-states.forEach(function (state) {
-    statesListEl.append(`<option value="${state.abbreviation}">${state.name}</option>`);
-})
+
     
 // Display states list when country list is set to United States
 countryListEl.change(function() {
@@ -126,53 +135,56 @@ function pullWeatherData(lat, lon) {
     })
     .then(function (data) {
         console.log(data);
-        printWeather(data);
+        console.log(data.timezone);
+        printWeather(data.current, data.daily, data.timezone);
     })
 }
 
-function printWeather(data) {
+function printWeather(current, daily, timezone) {
     // Converts dt variable from data into a readable Date
-    var currentDate = DateTime.fromSeconds(data.current.dt).toLocaleString();
-    var currentWeatherDesc = data.current.weather[0].description;
+    var currentDate = DateTime.fromSeconds(current.dt, {zone: timezone}).toFormat("EEE, M/d/y");
+    var currentWeatherDesc = current.weather[0].description;
     currentWeatherDesc = currentWeatherDesc.charAt(0).toUpperCase() + currentWeatherDesc.slice(1);        
-    var uvColor = uvBackColor(data.current.uvi);
+    var uvColor = uvBackColor(current.uvi);
 
     weatherCurrentEl.html("");
     weatherCurrentEl.addClass("border border-2 border-dark rounded");
     weatherCurrentEl.append(`
-        <h2 class="text-center mb-5">${cityLocation} (${currentDate})</h2>
+        <h2 class="text-center mb-0 mb-md-4">${cityLocation} (${currentDate})</h2>
+        <h3 class="text-center">Current time: ${DateTime.fromSeconds(current.dt, {zone: timezone}).toFormat("h:mma")}</h3>
         <div class="row justify-content-center">
-        <div class="col-auto"
-        <p>Temp: ${Math.round(data.current.temp)}°F</p>
-        <p><span class="text-warning">Hi: ${Math.round(data.daily[0].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(data.daily[0].temp.min)}°F</span></p>
-        <p>Wind: ${windDirection(data.current.wind_deg)} at ${Math.round(data.current.wind_speed)}mph</p>
-        <p>Humidity: ${data.current.humidity}%</p>
-        <span class="p-1 rounded"style="background-color:${uvColor}; margin: auto">UV Index: ${data.current.uvi} </span>
-        </div>
-        <div class="col-2">
-        </div>
-        <div class="col-auto">
-        <img src="http://openweathermap.org/img/wn/${data.current.weather[0].icon}@2x.png">
-        <p>${currentWeatherDesc}</p>
-        </div>
+            <div class="col-auto">
+                <img src="http://openweathermap.org/img/wn/${current.weather[0].icon}@2x.png">
+                <p>${currentWeatherDesc}</p>
+            </div>
+            <div class="col-0 col-md-2">
+            </div>
+            <div class="col-auto text-center"
+                <p>Temp: ${Math.round(current.temp)}°F</p>
+                <p><span class="text-warning">Hi: ${Math.round(daily[0].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(daily[0].temp.min)}°F</span></p>
+                <p>Wind: ${windDirection(current.wind_deg)} at ${Math.round(current.wind_speed)}mph</p>
+                <p>Humidity: ${current.humidity}%</p>
+                <span class="p-1 rounded"style="background-color:${uvColor}; margin: auto">UV Index: ${current.uvi} </span>
+            </div>
         </div>
         `);
 
     weather5DayEl.html("");
     weather5DayEl.append(`
-    <h3 class="text-center">5-Day Forcast:</h3>
-    <div class="d-flex justify-content-evenly" id="fiveDayForcast">
+        <h3 class="text-center">5-Day Forcast:</h3>
+        <div class="d-flex flex-wrap justify-content-evenly" id="fiveDayForcast">
     `);
     var testEl = $("#fiveDayForcast")
     for (var i = 1; i < 6; i++){
     testEl.append(`
-        <div class="bg-secondary p-2 mx-1">
-        <p class="text-center fw-bold">${DateTime.fromSeconds(data.daily[i].dt).toLocaleString()}</p>
-        <img src="http://openweathermap.org/img/wn/${data.daily[i].weather[0].icon}.png">
-        <p>${(data.daily[i].weather[0].description).charAt(0).toUpperCase() + (data.daily[i].weather[0].description).slice(1)}</p>
-        <p><span class="text-warning">Hi: ${Math.round(data.daily[i].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(data.daily[i].temp.min)}°F</span></p>
-        <p>Wind: ${windDirection(data.daily[i].wind_deg)} at ${Math.round(data.daily[i].wind_speed)}mph</p>
-        <p>Humidity: ${data.daily[i].humidity}%</p>
+        <div class="bg-secondary col-12 col-md-2 p-2 m-1 text-center">
+            <p class="fw-bold mt-2" style="line-height:.25">${DateTime.fromSeconds(daily[i].dt).toFormat("EEEE")}</p>
+            <p class="fw-bold" style="line-height:.25">${DateTime.fromSeconds(daily[i].dt).toFormat("(M/d/yy)")}</p>
+            <img src="http://openweathermap.org/img/wn/${daily[i].weather[0].icon}.png">
+            <p>${(daily[i].weather[0].description).charAt(0).toUpperCase() + (daily[i].weather[0].description).slice(1)}</p>
+            <p><span class="text-warning">Hi: ${Math.round(daily[i].temp.max)}°F</span>, <span class="text-info">Lo: ${Math.round(daily[i].temp.min)}°F</span></p>
+            <p>Wind: ${windDirection(daily[i].wind_deg)} at ${Math.round(daily[i].wind_speed)}mph</p>
+            <p>Humidity: ${daily[i].humidity}%</p>
         </div>
         `)
         }

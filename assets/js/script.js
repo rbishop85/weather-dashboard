@@ -9,7 +9,7 @@ var weatherHistoryEl = $("#weatherHistory");
 
 // API info
 var apiCountries = "https://restcountries.com/v3.1/all";
-var apiGeo = "http://api.openweathermap.org/geo/1.0/direct";
+var apiGeo = "https://api.openweathermap.org/geo/1.0/direct";
 var apiOneCall = "https://api.openweathermap.org/data/2.5/onecall";
 var apiKey = "3b1598e13550c0d6619df609201a1c27";
 
